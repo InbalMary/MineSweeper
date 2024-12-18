@@ -1,0 +1,32 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+	background-color: black;
+	font-family: Arial, Helvetica, sans-serif;
+	color: white;
+	font-size: larger;
+	text-align: center;
+}
+
+table {
+	margin: 40px auto;
+}
+
+.cell {
+	width: 40px;
+	height: 40px;
+	text-align: center;
+	background-color: rgb(183, 183, 183);
+}
+
+.cell:hover {
+	background-color: rgb(247, 245, 198);
+	cursor: pointer;
+}
+
+.selected {
+	background-color: rgb(83, 83, 83);
+	color: rgb(10, 29, 235);
+}
