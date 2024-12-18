@@ -30,3 +30,12 @@ table {
 	background-color: rgb(83, 83, 83);
 	color: rgb(10, 29, 235);
 }
+
+.hidden{
+	display: none;
+}
+
+.restart{
+	font-size: xx-large;
+	background-color: skyblue;
+}

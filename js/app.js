@@ -10,16 +10,35 @@ const MINE = '💣'
 const FLAG = '🚩'
 const EXPLOAD = '💥'
 
+const NORMAL = '🤓'
+const LOSE = '🤯'
+const WIN = '🤩'
+
 var gBoard
 var gMinesPoss
 var gMinesCounter
+var gLivesCounter = 3
+var gNumOfMarked = 0
+
+var gIsFirstClick = true
 
 function onInitGame() {
+    gIsFirstClick = true
+    setRestartBtn(NORMAL)
+    setLives()
     gBoard = buildBoard()
-    gMinesPoss = setRandMinesPoss(gBoard, NUM_OF_MINES)
-    gMinesCounter = NUM_OF_MINES
-    setMinesNegsCount(gBoard)
     renderBoard(gBoard)
+
+
+    // startGame()
+}
+
+function startGame(firstRowIdx, firstColIdx) {
+    gMinesPoss = setRandMinesPoss(gBoard, NUM_OF_MINES, firstRowIdx, firstColIdx)
+    gMinesCounter = NUM_OF_MINES
+    gNumOfMarked = NUM_OF_MINES
+    setMinesNegsCount(gBoard)
+    
 }
 
 function buildBoard() {
@@ -100,24 +119,46 @@ function countNegs(cellI, cellJ, mat) {
     return count
 }
 
-function onCellClicked(elCell, i, j) {
+function onCellClicked(elCell, i, j) { //left
+    if (gIsFirstClick) {
+        gNumOfMarked = NUM_OF_MINES
+        renderMarkedCounter(NUM_OF_MINES)
+        gIsFirstClick = false
+        startGame(i, j)
+    }
+
     const cell = gBoard[i][j]
     console.log('cell', cell, i, j)
     if (!cell.isShown && !cell.isMarked) {
         if (cell.isMine) {
-            console.log('Game Over')
-            elCell.innerText = MINE
-            gameOver(elCell, i, j)
+            if (gLivesCounter > 0) {
+                elCell.innerText = MINE
+                gLivesCounter--
+                gMinesCounter--
+                gNumOfMarked--
+                renderMarkedCounter(gNumOfMarked)
+
+                var elLives = document.querySelectorAll('.lives')
+                elLives[gLivesCounter].classList.add('hidden')
+                console.log('gLivesCounter', gLivesCounter)
+            } else {
+                console.log('Game Over')
+                gameOver(elCell, i, j)
+            }
+
         } else {
-            if (cell.minesAroundCount) elCell.innerText = cell.minesAroundCount;
+            elCell.classList.add('selected')
+            if (cell.minesAroundCount) {
+                elCell.innerText = cell.minesAroundCount
+            }
+            else expandShown(gBoard, i, j)
         }
         cell.isShown = true
         if (gMinesCounter === 0) {
             checkGameOver()
         }
     }
-
-    cell.isMarked = true
+    // cell.isMarked = true
     console.log('negscount', cell.minesAroundCount)
 }
 
@@ -129,10 +170,18 @@ function onRightCellClicked(elCell, i, j) {
     if (!cell.isShown) {
         if (!cell.isMarked) {
             elCell.innerText = FLAG
-            if (cell.isMine) gMinesCounter--
+            gNumOfMarked--
+            renderMarkedCounter(gNumOfMarked)
+            if (cell.isMine) {
+                gMinesCounter--
+            }
         } else {
             elCell.innerText = ''
-            if (cell.isMine) gMinesCounter++
+            gNumOfMarked++
+            renderMarkedCounter(gNumOfMarked)
+            if (cell.isMine) {
+                gMinesCounter++
+            }
         }
         cell.isMarked = !cell.isMarked
     }
@@ -153,6 +202,7 @@ function gameOver() {
         // console.log('elMine', elMine)
         elMine.innerText = EXPLOAD
     }
+    setRestartBtn(LOSE)
 }
 
 function onCellMarked(elCell) {
@@ -165,7 +215,7 @@ function checkGameOver() {
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard[i].length; j++) {
             var cell = gBoard[i][j]
-            if ((cell.isMine && cell.isMarked) || (!cell.isMine && cell.isShown)) {
+            if ((cell.isMine && cell.isMarked) || (!cell.isMine && cell.isShown) || (cell.isMine && cell.isShown)) {
                 flag = 1
             } else {
                 console.log('nooooo')
@@ -174,21 +224,42 @@ function checkGameOver() {
         }
     }
     console.log('YOU WON')
+    setRestartBtn(WIN)
     if (flag === 1) return true
 }
 
-function expandShown(board, elCell,
-    i, j) {
+function expandShown(mat, cellI, cellJ) {
+    for (var i = cellI - 1; i <= cellI + 1; i++) {
+        if (i < 0 || i >= mat.length) continue
+        for (var j = cellJ - 1; j <= cellJ + 1; j++) {
+            if (i === cellI && j === cellJ) continue
+            if (j < 0 || j >= mat[i].length) continue
 
+            const neg = mat[i][j]
+            if (!neg.isShown && !neg.isMarked) {
+                neg.isShown = true;
+                const elNeg = document.querySelector(`.cell-${i}-${j}`);
+                elNeg.classList.add('selected');
+                if (neg.minesAroundCount) {
+                    elNeg.innerText = neg.minesAroundCount;
+                }
+                // else {
+                //     expandShown(mat, elNeg, i, j); // Recursion!!
+                // }
+            }
+        }
+    }
 }
 
-function setRandMinesPoss(board, num) {
+
+function setRandMinesPoss(board, num, firstRowIdx, firstColIdx) {
     var minesPoss = []
     var minesNum = 0
     while (minesNum < num) {
         var pos = { i: getRandomIntInclusive(0, ROWS - 1), j: getRandomIntInclusive(0, COLS - 1) }
+        if (pos.i === firstRowIdx && pos.j === firstColIdx) continue
         if (board[pos.i][pos.j].isMine === false) {
-            // console.log('mine pos:', pos);
+            console.log('mine pos:', pos);
             board[pos.i][pos.j].isMine = true;
             minesPoss.push(pos)
             minesNum++
@@ -199,6 +270,10 @@ function setRandMinesPoss(board, num) {
 
 function onSetLevel(elLevel) {
     const gameLevel = elLevel.classList[0]
+    gIsFirstClick = true
+
+    setLives()
+
     switch (gameLevel) {
         case 'Beginner':
             ROWS = 4
@@ -219,4 +294,24 @@ function onSetLevel(elLevel) {
             break;
     }
     onInitGame()
+}
+
+function setRestartBtn(state) {
+    var elLose = document.querySelector('.restart')
+    elLose.innerText = state
+}
+
+function setLives() {
+    gLivesCounter = 3
+
+    const elLives = document.querySelectorAll('.lives')
+    for (var i = 0; i < elLives.length; i++) {
+        elLives[i].classList.remove('hidden')
+    }
+}
+
+function renderMarkedCounter(markedCount) {
+    var elMinesCount = document.querySelector('.mines-left span')
+    console.log('variable', elMinesCount)
+    elMinesCount.innerText = markedCount
 }
