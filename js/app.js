@@ -30,17 +30,27 @@ function onInitGame() {
     gHintCounter = 3
     gSafeLeft = 3
     gIsManualMode = false
+    gMega.gIsMegaHint = false
+    gMega.gMegaPoss = []
+    gMinesPoss = []
+    gAllMoves = []
     setRestartBtn(NORMAL)
     setLives()
     setHints()
     setSafeClicks()
+    resetManualMode()
     gBoard = buildBoard()
     renderBoard(gBoard)
     renderMarkedCounter('')
 }
 
 function startGame(firstRowIdx, firstColIdx) {
-    gMinesPoss = setRandMinesPoss(gBoard, NUM_OF_MINES, firstRowIdx, firstColIdx)
+    if (gMinesPoss.length === NUM_OF_MINES) {
+        // console.log('Using manual mode', gMinesPoss)
+        hideManualMines()
+    } else {
+        gMinesPoss = setRandMinesPoss(gBoard, NUM_OF_MINES, firstRowIdx, firstColIdx)
+    }
     gMinesCounter = NUM_OF_MINES
     gNumOfMarked = NUM_OF_MINES
     setMinesNegsCount(gBoard)
@@ -55,7 +65,7 @@ function buildBoard() {
                 minesAroundCount: 0,
                 isShown: false,
                 isMine: false,
-                isMarked: false
+                isMarked: false,
             }
         }
     }
@@ -74,9 +84,9 @@ function renderBoard(board) {
             const currCell = board[i][j]
 
             var cellClass = getClassName({ i, j })
-            if (currCell.isMine) cellClass += ' mine'
-            if (currCell.minesAroundCount) cellClass += ' number'
-            if (!currCell.isMine && !currCell.minesAroundCount) cellClass += ' empty'
+            // if (currCell.isMine) cellClass += ' mine'
+            // if (currCell.minesAroundCount) cellClass += ' number'
+            // if (!currCell.isMine && !currCell.minesAroundCount) cellClass += ' empty'
 
             strHTML += `\t<td class="cell ${cellClass}" onclick="onCellClicked(this, ${i}, ${j})" 
                                 oncontextmenu="onRightCellClicked(this, ${i}, ${j})">`
@@ -120,9 +130,43 @@ function countNegs(cellI, cellJ, mat) {
 }
 
 function onCellClicked(elCell, i, j) { //left
+    gAllMoves.push({ i, j })
+    if (gMega.gIsMegaHint && !gMega.gIsFirstMegaStep) {
+        gMega.gIsFirstMegaStep = true
+        gMega.gMegaPoss.push({ i, j })
+        return
+    }
+
+    if (gMega.gIsMegaHint && gMega.gIsFirstMegaStep) {
+        gMega.gIsMegaHint = false
+        gMega.gIsFirstMegaStep = false
+        gMega.gMegaPoss.push({ i, j })
+        handelMegaHint(gMega.gMegaPoss)
+        return
+    }
+
     if (gIsHintClicked) {
         handelHint(elCell, i, j)
         gIsHintClicked = false
+        return
+    }
+
+    if (gIsManualMode) {
+        console.log('Manual mode active. Adding mine at:', i, j);
+        console.log('Current mines:', gMinesPoss);
+        if (gBoard[i][j].isMine) return
+        // renderMarkedCounter(NUM_OF_MINES)
+        gBoard[i][j].isMine = true
+        gMinesPoss.push({ i, j })
+        elCell.innerText = MINE
+        setMinesNegsCount(gBoard)
+        renderMarkedCounter(NUM_OF_MINES - gMinesPoss.length)
+
+        if (gMinesPoss.length === NUM_OF_MINES) {
+            gIsManualMode = false
+            gIsFirstClick = true
+
+        }
         return
     }
 
@@ -147,7 +191,7 @@ function onCellClicked(elCell, i, j) { //left
 
                 var elLives = document.querySelectorAll('.lives')
                 elLives[gLivesCounter].classList.add('hidden')
-                console.log('gLivesCounter', gLivesCounter)
+                // console.log('gLivesCounter', gLivesCounter)
             } else {
                 console.log('Game Over')
                 gameOver(elCell, i, j)
@@ -158,24 +202,23 @@ function onCellClicked(elCell, i, j) { //left
             if (cell.minesAroundCount) {
                 elCell.innerText = cell.minesAroundCount
             }
-            else expandShown(gBoard, i, j)
+            else {
+                expandShown(gBoard, i, j)
+            }
         }
         cell.isShown = true
         if (gMinesCounter === 0) {
             checkGameOver()
         }
     }
-    // cell.isMarked = true
-    console.log('negscount', cell.minesAroundCount)
 }
 
 function onRightCellClicked(elCell, i, j) {
-
     console.log('gMinesCounter', gMinesCounter)
     const cell = gBoard[i][j]
-    console.log('cell', cell, i, j)
 
     if (!cell.isShown && !cell.isMarked && gNumOfMarked <= 0) return
+    gAllMoves.push({ i, j })
 
     if (!cell.isShown) {
         if (!cell.isMarked) {
@@ -216,7 +259,7 @@ function gameOver() {
 }
 
 function checkGameOver() {
-    console.log('checVic')
+    // console.log('checVic')
     var flag = 1
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard[i].length; j++) {
@@ -256,11 +299,9 @@ function expandShown(mat, cellI, cellJ) {
     }
 }
 
+
+
 function setRandMinesPoss(board, num, firstRowIdx, firstColIdx) {
-    if(gIsManualMode){
-        setMinesPossManually(board, num, firstRowIdx, firstColIdx)
-        return
-    }
     var minesPoss = []
     var minesNum = 0
     while (minesNum < num) {

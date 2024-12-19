@@ -10,9 +10,17 @@ var gTimerInterval
 var gHintCounter = 3
 var gSafeLeft = 3
 var gIsManualMode = false
+var gIsDarkMode = true
+var gIsUndo = false
+var gAllMoves
+var gMega = {
+    gIsMegaHint: false,
+    gIsFirstMegaStep: false,
+    gMegaPoss: []
+}
 
 function onGetHint(elHint) {
-    if(!gHintCounter) return
+    if (!gHintCounter) return
     gHintCounter--
     console.log('elHint', elHint)
     gIsHintClicked = true
@@ -28,13 +36,14 @@ function handelHint(elCell, rowIdx, colIdx) {
             var currCell = gBoard[i][j]
 
             if (!currCell.isShown || i === rowIdx && j === colIdx) {
-                highlightSelected(i,j, 1000)
+                highlightSelected(i, j, 1000)
             }
         }
     }
 }
 
 function highlightSelected(i, j, time) {
+    console.log('mega')
     const elNeg = document.querySelector(`.cell-${i}-${j}`)
     const origText = elNeg.innerText
     // console.log('elNeg', elNeg)
@@ -105,20 +114,113 @@ function setBestScore(level) {
     elLevel.innerHTML = isNaN(bestScore) ? `${level} Level <br> Best Score: No score yet!` : `${level} Level <br> Best Score: ${bestScore} seconds!`
 }
 
-function onSafeClick(elSafeBtn){
-    if(!gSafeLeft) return
+function onSafeClick(elSafeBtn) {
+    if (!gSafeLeft) return
     gSafeLeft--
     var elSafeLeft = elSafeBtn.querySelector('.safeLefts span')
-    elSafeLeft.innerText = gSafeLeft    
+    elSafeLeft.innerText = gSafeLeft
     showRandSafeCell()
 }
 
-function showRandSafeCell(){
+function showRandSafeCell() {
     var pos = findEmptyPos()
-    highlightSelected(pos.i, pos.j, 2000)   
+    highlightSelected(pos.i, pos.j, 2000)
 }
 
-function setSafeClicks(){
+function setSafeClicks() {
     var elSafeLeft = document.querySelector('.safeLefts span')
     elSafeLeft.innerText = gSafeLeft
+}
+
+function onManualMode(elMan) {
+    gIsManualMode = true
+    elMan.classList.add('lighted')
+}
+
+function resetManualMode() {
+    var elMan = document.querySelector('.manual')
+    elMan.classList.remove('lighted')
+}
+
+function hideManualMines() {
+    for (var k = 0; k < gMinesPoss.length; k++) {
+        var pos = gMinesPoss[k]
+        var elMine = document.querySelector(`.cell-${pos.i}-${pos.j}`)
+        elMine.innerText = ''
+    }
+}
+
+function onMegaHint(elMega) {
+    gMega.gIsMegaHint = true
+    elMega.classList.add('lighted')
+}
+
+function resetMegaHint() {
+    var elMega = document.querySelector('.mega')
+    elMega.classList.remove('lighted')
+}
+
+function handelMegaHint(poss) {
+    if (!poss || poss.length !== 2) return
+
+    var rowIdxStart = Math.min(poss[0].i, poss[1].i)
+    var rowIdxEnd = Math.max(poss[0].i, poss[1].i)
+    var colIdxStart = Math.min(poss[0].j, poss[1].j)
+    var colIdxEnd = Math.max(poss[0].j, poss[1].j)
+
+    for (var i = rowIdxStart; i <= rowIdxEnd; i++) {
+        for (var j = colIdxStart; j <= colIdxEnd; j++) {
+            console.log('i, j', i, j)
+            highlightSelected(i, j, 2500)
+            resetMegaHint()
+        }
+    }
+    gMega.gMegaPoss = []
+}
+
+function onDarkMode(elBtn) {
+    const elBody = document.querySelector('.dark')
+    if (gIsDarkMode) {
+        elBtn.innerText = 'Dark Mode🌃'
+        elBody.classList.add('day-light')
+    } else {
+        elBtn.innerText = 'DayLight🌞'
+        elBody.classList.remove('day-light')
+    }
+    // elBtn.innerText = gIsDarkMode ? 'Dark Mode🌃' : 'DayLight🌞'
+    gIsDarkMode = !gIsDarkMode
+}
+
+function onUndo(elUndoBtn) { //the expanded cell still dont undo completely
+    gIsUndo = true
+    var pos = gAllMoves.splice(gAllMoves.length - 1, 1)[0]
+    if (!pos) return
+    // console.log('pos', pos)
+    // console.log('gAllMoves', gAllMoves)
+
+    const elCell = document.querySelector(`.cell-${pos.i}-${pos.j}`)
+    var cell = gBoard[pos.i][pos.j]
+    // console.log('cell', cell, elCell)
+    
+    if (cell.isMarked) { //flaged
+        cell.isMarked = false
+        elCell.innerText = ''
+        gNumOfMarked++
+        // console.log('gNumOfMarked if marked', gNumOfMarked)
+        renderMarkedCounter(gNumOfMarked)
+    }
+
+    if (cell.isShown) { //num, empty, mine
+        elCell.classList.remove('selected')      
+        elCell.innerText = ''
+        if (cell.minesAroundCount === null) {
+
+        } else if (cell.isMine) {
+            gNumOfMarked++
+            console.log('mineeee gNumOfMarked', gNumOfMarked)
+            renderMarkedCounter(gNumOfMarked)
+            return
+        }
+    cell.isShown = false
+    } 
 }
