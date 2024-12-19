@@ -16,7 +16,7 @@
             <td></td>
             <td><button class="restart" onclick="onInitGame()">🤓</button></td>
             <td></td>
-            <td class="timer">Timer <span>0.000</span></td>
+            <td>Timer <span class="timer">0.00</span></td>
         </tr>
         
     </table>
@@ -29,7 +29,15 @@
             <td class="lives">❤️</td>
             <td class="lives">❤️</td>
         </tr>
+        <tr>
+            <td onclick="onGetHint(this)" class="hint">💡</td>
+            <td onclick="onGetHint(this)" class="hint">💡</td>
+            <td onclick="onGetHint(this)" class="hint">💡</td>
+        </tr>
     </table>
+
+    <button onclick="onSafeClick(this)" class="safe-click">Safe Click <p class="safeLefts"><span>3</span> clicks available</p></button>
+    
 
     <table>
         <tbody class="board"></tbody>
@@ -40,11 +48,15 @@
         <button onclick="onSetLevel(this)" class="Medium">Medium</button>
         <button onclick="onSetLevel(this)" class="Expert">Expert</button>
     </div>
+
+    <button onclick="onManualMode(this)" class="manual">Manual Mode</button>
     <br>
+    <h5 class="best-score">Beginner Level <br> Best Score: </h5>
     <hr>
     <footer on>Inbal Mary</footer>
     <script src="js/util.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/bonus.js"></script>
 </body>
 
 </html>

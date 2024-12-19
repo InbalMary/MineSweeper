@@ -11,7 +11,7 @@ body {
 }
 
 table {
-	margin: 40px auto;
+	margin: 20px auto;
 }
 
 .cell {
@@ -38,4 +38,16 @@ table {
 .restart{
 	font-size: xx-large;
 	background-color: skyblue;
+}
+
+.hint{
+	background-color: white;
+}
+
+.lighted{
+	background-color: rgb(242, 242, 179);
+}
+
+.safeLefts{
+	font-size: 10px
 }
