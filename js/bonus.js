@@ -13,6 +13,8 @@ var gIsManualMode = false
 var gIsDarkMode = true
 var gIsUndo = false
 var gAllMoves
+var gAllExpansions = []
+var gExterminatedMineCount = 0
 var gMega = {
     gIsMegaHint: false,
     gIsFirstMegaStep: false,
@@ -191,8 +193,9 @@ function onDarkMode(elBtn) {
     gIsDarkMode = !gIsDarkMode
 }
 
-function onUndo(elUndoBtn) { //the expanded cell still dont undo completely
+function onUndo() { 
     gIsUndo = true
+    console.log('gAllMoves:', gAllMoves)
     var pos = gAllMoves.splice(gAllMoves.length - 1, 1)[0]
     if (!pos) return
     // console.log('pos', pos)
@@ -206,21 +209,65 @@ function onUndo(elUndoBtn) { //the expanded cell still dont undo completely
         cell.isMarked = false
         elCell.innerText = ''
         gNumOfMarked++
-        // console.log('gNumOfMarked if marked', gNumOfMarked)
         renderMarkedCounter(gNumOfMarked)
     }
 
+    // console.log('variableeeeeeeee', gAllExpansions[gAllExpansions.length-1][gAllExpansions.length-1][0].i)
+    if(pos.i === gAllExpansions[gAllExpansions.length-1][gAllExpansions.length-1][0].i &&
+        pos.j === gAllExpansions[gAllExpansions.length-1][gAllExpansions.length-1][0].j){
+            handelHideExpension()
+        }
     if (cell.isShown) { //num, empty, mine
         elCell.classList.remove('selected')      
         elCell.innerText = ''
-        if (cell.minesAroundCount === null) {
 
-        } else if (cell.isMine) {
+        if (cell.isMine) {
             gNumOfMarked++
             console.log('mineeee gNumOfMarked', gNumOfMarked)
             renderMarkedCounter(gNumOfMarked)
+            cell.isShown = false
             return
         }
-    cell.isShown = false
+        cell.isShown = false
     } 
+
+}
+
+function handelHideExpension(){
+    var len = gAllExpansions[gAllExpansions.length-1][gAllExpansions.length-1].length
+    // console.log('len:', len)
+    for(var i=1; i<len; i++){
+        // console.log('variableI', gAllExpansions[gAllExpansions.length-1][gAllExpansions.length-1][i].i)
+        var curI= gAllExpansions[gAllExpansions.length-1][gAllExpansions.length-1][i].i
+        var curJ = gAllExpansions[gAllExpansions.length-1][gAllExpansions.length-1][i].j
+        var cell = gBoard[curI][curJ]
+        const elCell = document.querySelector(`.cell-${curI}-${curJ}`)
+        // const elCell = document.querySelector(`.cell-${gAllExpansions[gAllExpansions.length-1][gAllExpansions.length-1][i].i}-${gAllExpansions[gAllExpansions.length-1][gAllExpansions.length-1][i].j}`)
+        elCell.classList.remove('selected')  
+        elCell.innerText = ''
+        cell.isShown = false
+    }
+}
+
+function onExterminator(elBtn){
+    // console.log('gNumOfMarked', gNumOfMarked)
+    if(gNumOfMarked < 3) return
+    // console.log('gMinesPoss before', gMinesPoss)
+    while(gExterminatedMineCount < 3){
+        var randMineIdx = getRandomIntInclusive(0, gMinesPoss.length)
+        // console.log('randMineIdx', randMineIdx)
+        var randMinePos = gMinesPoss[randMineIdx]
+        // console.log('randMinePos', randMinePos)
+
+        if(gBoard[randMinePos.i][randMinePos.j].isMine && !gBoard[randMinePos.i][randMinePos.j].isShown){
+            gBoard[randMinePos.i][randMinePos.j].isMine = false
+            gMinesPoss.splice(randMinePos, 1)[0]
+        }
+        gNumOfMarked--
+        gMinesCounter--
+        gExterminatedMineCount++
+    }
+    renderMarkedCounter(gNumOfMarked)
+    setMinesNegsCount(gBoard)
+    // console.log('gMinesPoss after', gMinesPoss)
 }

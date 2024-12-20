@@ -34,6 +34,7 @@ function onInitGame() {
     gMega.gMegaPoss = []
     gMinesPoss = []
     gAllMoves = []
+    gExterminatedMineCount = 0
     setRestartBtn(NORMAL)
     setLives()
     setHints()
@@ -152,8 +153,6 @@ function onCellClicked(elCell, i, j) { //left
     }
 
     if (gIsManualMode) {
-        console.log('Manual mode active. Adding mine at:', i, j);
-        console.log('Current mines:', gMinesPoss);
         if (gBoard[i][j].isMine) return
         // renderMarkedCounter(NUM_OF_MINES)
         gBoard[i][j].isMine = true
@@ -166,6 +165,9 @@ function onCellClicked(elCell, i, j) { //left
             gIsManualMode = false
             gIsFirstClick = true
 
+            setTimeout(() => {
+                hideAllmines()
+            }, 1000)
         }
         return
     }
@@ -203,6 +205,12 @@ function onCellClicked(elCell, i, j) { //left
                 elCell.innerText = cell.minesAroundCount
             }
             else {
+                gAllExpansions[gAllExpansions.length] = []
+                gAllExpansions[gAllExpansions.length - 1][gAllExpansions.length - 1] = []
+
+
+                gAllExpansions[gAllExpansions.length - 1][gAllExpansions.length - 1].push({ i, j })
+                console.log('variable', i, j)
                 expandShown(gBoard, i, j)
             }
         }
@@ -289,12 +297,16 @@ function expandShown(mat, cellI, cellJ) {
 
             const neg = mat[i][j]
             if (neg.isShown || neg.isMarked) continue
+
+            console.log('gAllExpansions[gAllExpansions.length-1]', gAllExpansions[gAllExpansions.length - 1])
+            gAllExpansions[gAllExpansions.length - 1][gAllExpansions.length - 1].push({ i, j })
+            console.log('gAllExpansions', gAllExpansions)
             neg.isShown = true
             const elNeg = document.querySelector(`.cell-${i}-${j}`)
             elNeg.classList.add('selected')
 
             if (neg.minesAroundCount) elNeg.innerText = neg.minesAroundCount
-            else expandShown(mat, i, j)            
+            else expandShown(mat, i, j)
         }
     }
 }
@@ -366,3 +378,11 @@ function renderMarkedCounter(markedCount) {
     elMinesCount.innerText = markedCount
 }
 
+
+function hideAllmines() {
+    for (var i = 0; i < gMinesPoss.length; i++) {
+        const elMine = document.querySelector(`.cell-${gMinesPoss[i].i}-${gMinesPoss[i].j}`)
+        elMine.classList.remove('selected')
+        elMine.innerText = ''
+    }
+}
