@@ -1,78 +1,162 @@
 * {
 	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	font-weight: bold;
 }
 
 body {
-	background-color: black;
-	font-family:'Times New Roman', Times, serif;
-	color: white;
-	font-size: larger;
+	--s: 75px;
+	/* control the size*/
+	--c1: #1a150e;
+	--c2: #537969;
+
+	--g: , var(--c1) 25%, var(--c2) 0 50%, #0000 0;
+	background:
+		repeating-conic-gradient(var(--c1) 0 30deg, #0000 0 150deg, var(--c2) 0 50%) calc(1.5*var(--s)) calc(.865*var(--s)),
+		conic-gradient(from 30deg at 75% 75%var(--g)),
+		conic-gradient(from -30deg at 75% 25%var(--g)),
+		conic-gradient(from 150deg at 25% 75%var(--g)),
+		conic-gradient(from 210deg at 25% 25%var(--g)),
+		repeating-conic-gradient(var(--c1) 0 30deg, var(--c2) 0 60deg);
+	background-size: calc(3*var(--s)) calc(1.73*var(--s));
+
+
+	/* background-color: #121212; */
+	font-family: 'Times New Roman', Times, serif;
+	color: #f5f5f5;
+	font-size: x-large;
 	text-align: center;
+	line-height: 1.6;
+	padding: 20px;
 }
 
 table {
 	margin: 10px auto;
+	border-collapse: separate;
+	border-spacing: 2px;
+	border-radius: 5px;
 }
 
 .cell {
 	width: 40px;
 	height: 40px;
 	text-align: center;
-	background-color: rgb(183, 183, 183);
+	background-color: #b7b7b7;
+	color: #000;
+	border-radius: 5px;
 }
 
 .cell:hover {
+	background-color: #f7f5c6;
 	background-color: rgb(247, 245, 198);
 	cursor: pointer;
+	cursor: pointer;
+	transform: scale(1.1);
 }
 
 .selected {
-	background-color: rgb(83, 83, 83);
-	color: rgb(10, 29, 235);
+	background-color: #535353;
+	color: #29cbf8;
+	border: 2px solid #020952;
 }
 
-.hidden{
+.hidden {
 	display: none;
 }
 
-.restart{
+.restart {
 	font-size: xx-large;
-	background-color: skyblue;
+	background-color: rgb(77, 163, 166);
+	color: #fff;
+	padding: 10px 10px;
+	border-radius: 8px;
+	cursor: pointer;
+	border: none;
+	transition: background-color 0.3s, transform 0.2s;
 }
 
-.hint{
-	background-color: white;
+.restart:hover {
+	background-color: rgb(93, 197, 201);
+	transform: scale(1.05);
 }
 
-.lighted{
-	background-color: rgb(242, 242, 179);
+.hint {
+	background-color: #fff;
+	border: 1px solid #ddd;
+	padding: 5px 10px;
+	border-radius: 5px;
 }
 
-.safeLefts{
-	font-size: 10px
+.hint:hover {
+	transform: scale(1.05);
+	cursor: pointer;
 }
 
-.day-light{
-	background-color: rgb(162, 162, 94);
+.lighted {
+
+	background-color: #f2f2b3;
+
+}
+
+.safeLefts {
+	font-size: 10px;
+	color: #bc7a6b;
+	border-radius: 10px;
+}
+
+.day-light {
 	color: black;
-}
-button{
-	padding: 2px;
-	border-radius: 10%;
-	background-color: rgb(189, 162, 189);
-	line-height: 1;
+
+	--s: 16px;
+	/* control the size*/
+	--c1: #5e9fa3;
+	--c2: #b05574;
+	--c3: #b39c82;
+	--c4: #dcd1b4;
+
+	background:
+		conic-gradient(at 50% calc(100%/6), var(--c1) 60deg, #0000 0),
+		conic-gradient(at calc(100%/6) 50%, #0000 240deg, var(--c1) 0),
+		conic-gradient(from 180deg at calc(100%/6) calc(500%/6), var(--c1) 60deg, #0000 0),
+		conic-gradient(from 180deg at calc(500%/6), #0000 240deg, var(--c1) 0) calc(4*.866*var(--s)) 0,
+		repeating-linear-gradient(-150deg, var(--c2) 0 calc(100%/6), #0000 0 50%),
+		repeating-linear-gradient(-30deg, var(--c3) 0 calc(100%/6), var(--c4) 0 50%);
+	background-size: calc(6*.866*var(--s)) calc(3*var(--s))
 }
 
-.safe-click{
+button {
+	padding: 5px 10px;
+	border-radius: 5px;
+	background-color: rgb(119, 212, 204);
+	line-height: 1.2;
+	color: rgb(12, 78, 72);
+	border: none;
+	cursor: pointer;
+}
+
+button:hover {
+	background-color: rgb(111, 244, 233);
+	transform: scale(1.05);
+}
+
+.safe-click {
 	background-color: rgb(156, 202, 187);
+	color: #fff;
+	font-weight: bold;
 }
 
-table {
-    border-collapse: separate;
-    border-spacing: 4px;
+.safe-click:hover {
+	background-color: rgb(106, 139, 128);
+	;
+	transform: scale(1.05);
 }
 
-.hint{
+.hint {
 	/* background-color: transparent; */
-    border: none;
+	border: 1px solid #ccc;
+}
+
+.lives {
+	font-size: xx-large;
 }
