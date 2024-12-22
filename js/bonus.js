@@ -126,7 +126,7 @@ function onSafeClick(elSafeBtn) {
 
 function showRandSafeCell() {    
     var isSafe = false
-    while(isSafe){
+    while(!isSafe){
         var pos = findEmptyPos()
         if(!gBoard[pos.i][pos.j].isMine){
             highlightSelected(pos.i, pos.j, 2000)
