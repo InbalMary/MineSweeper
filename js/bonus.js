@@ -124,9 +124,15 @@ function onSafeClick(elSafeBtn) {
     showRandSafeCell()
 }
 
-function showRandSafeCell() {
-    var pos = findEmptyPos()
-    highlightSelected(pos.i, pos.j, 2000)
+function showRandSafeCell() {    
+    var isSafe = false
+    while(isSafe){
+        var pos = findEmptyPos()
+        if(!gBoard[pos.i][pos.j].isMine){
+            highlightSelected(pos.i, pos.j, 2000)
+            isSafe = true
+        }
+    }   
 }
 
 function setSafeClicks() {
@@ -172,6 +178,7 @@ function handelMegaHint(poss) {
 
     for (var i = rowIdxStart; i <= rowIdxEnd; i++) {
         for (var j = colIdxStart; j <= colIdxEnd; j++) {
+            if(gBoard[i][j].isShown) continue
             console.log('i, j', i, j)
             highlightSelected(i, j, 2500)
             resetMegaHint()
